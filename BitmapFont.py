@@ -12,8 +12,15 @@ class BitmapFont:
         self.surf_arr = pygame.surfarray.array2d(self.font_surface)
         self._scan_letter_coords()
         
-    def drawBitmapText(self, text):
-        pass
+    def draw_bitmap_text(self, surface, x_pos, y_pos, text):
+        cur_x_pos = x_pos
+        cur_y_pos = y_pos
+
+        for char in text:
+            self._put_bitmap_char(surface, cur_x_pos, cur_y_pos, char)
+            char_width = self.letter_pos_dict[char][1][0] - self.letter_pos_dict[char][0][0] - 1
+            cur_x_pos += char_width
+ 
 
     def _put_bitmap_char(self, surface, x_pos, y_pos, char):
         letter_info = self.letter_pos_dict[char]
