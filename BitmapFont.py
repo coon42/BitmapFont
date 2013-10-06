@@ -7,9 +7,12 @@ class BitmapFont:
         self.ascii_table = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
         self.letter_pos_dict = {}
 
-    def load_bitmap_font(self):
-        self.font_surface = pygame.image.load("fonts/scroller.bmp")
-        self.surf_arr = pygame.surfarray.array2d(self.font_surface)
+    def load_bitmap_font(self, path):
+        self.font_surface = pygame.image.load(path).convert() # convert bitmap format to screen formal (pixel depth etc...)
+        self.surf_arr = pygame.surfarray.array2d(self.font_surface.convert(8))
+        print "Debug: surf_arr: "
+        print self.surf_arr
+
         self._scan_letter_coords()
         
     def draw_bitmap_text(self, surface, x_pos, y_pos, text):
@@ -17,12 +20,11 @@ class BitmapFont:
         cur_y_pos = y_pos
 
         for char in text:
-            self._put_bitmap_char(surface, cur_x_pos, cur_y_pos, char)
+            self.put_bitmap_char(surface, cur_x_pos, cur_y_pos, char)
             char_width = self.letter_pos_dict[char][1][0] - self.letter_pos_dict[char][0][0] - 1
             cur_x_pos += char_width
  
-
-    def _put_bitmap_char(self, surface, x_pos, y_pos, char):
+    def put_bitmap_char(self, surface, x_pos, y_pos, char):
         letter_info = self.letter_pos_dict[char]
 
         if letter_info != None:
@@ -34,17 +36,16 @@ class BitmapFont:
             surface.blit(self.font_surface, 
                         (x_pos, y_pos), pygame.Rect( (font_x_pos1 + 1, font_y_pos1 + 1), (font_x_pos2 - font_x_pos1 - 1, font_y_pos2)))
 
-
-    def _scan_letter_coords(self):
+    def _scan_letter_coords(self):  
         self.letter_pos_dict = {}
-         
+
         self.SEARCH_NEXT_LETTER, self.GET_LETTER_LENGTH = range(2)
         self.state = self.SEARCH_NEXT_LETTER
         all_letters_found = False
         self._cur_x_pos = 0
         self._last_letter_x_pos = 0
         self._cur_letter_index  = -1
-     
+
         while(not all_letters_found):
             letter_info = self._get_next_letter()
 
@@ -61,6 +62,10 @@ class BitmapFont:
                 print "end of bitmap."
 
             all_letters_found = True if letter_info == None else False
+
+        # at last fill all undefined letters with rhe default "?" char position.
+        #for  self.letter_pos_dict
+
 
         return self.letter_pos_dict
 
@@ -93,9 +98,28 @@ class BitmapFont:
                     self.state = self.SEARCH_NEXT_LETTER
             
     def _get_next_key_pixel_x_pos(self):
+        key_value = 127
+
         for i in range(self._cur_x_pos, self.font_surface.get_width()):
-            if self.surf_arr[i, 0] == 0:
+            if self.surf_arr[i, 0] == key_value:
                 self._cur_x_pos = i + 1
                 return i
  
-        return None 
+        return None
+
+
+class BitmapFontScroller:
+    def __init__(self):
+        bf = BitmapFont()
+        self.cur_text_pos = 0
+        self.x_pos = 0
+        self.y_pos = 0
+        self.text = ""
+
+    def set_text(self, pos_x, pos_y, text):
+        self.text = text
+
+    def tick(self):
+        pass
+
+
