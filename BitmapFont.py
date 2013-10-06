@@ -1,6 +1,19 @@
 import pygame
 
 
+class BitmapChar():
+    def __init__(self, font_surface, width, height):
+        self.font_surface = font_surface
+        self.width = width
+        self.height = height
+
+    def get_width(self):
+        return self.width
+
+    def get_height(self):
+        return self.height
+
+
 class BitmapFont:
     def __init__(self):
         # index starts at 0x20h
@@ -109,17 +122,27 @@ class BitmapFont:
 
 
 class BitmapFontScroller:
-    def __init__(self):
-        bf = BitmapFont()
-        self.cur_text_pos = 0
-        self.x_pos = 0
-        self.y_pos = 0
+    def __init__(self, target_surface, x_pos, y_pos):
+        self.scroller_surf = pygame.Surface((200, 30))
+        self.bf = BitmapFont()
+        self.bf.load_bitmap_font("fonts/1/coolspot.bmp")
         self.text = ""
+        self.cur_text_pos = 0
+        self.target_surface = target_surface
+        self.x_pos = x_pos
+        self.y_pos = y_pos
 
-    def set_text(self, pos_x, pos_y, text):
+    def set_text(self, text):
         self.text = text
+        self.cur_text_pos = 0
+
+    def _drop_char(self):
+        cur_char = self.text[self.cur_text_pos]
+        self.bf.put_bitmap_char(self.scroller_surf, 0, cur_char)
 
     def tick(self):
-        pass
+        self.x_pos -= 1
+        self.target_surface.blit(self.scroller_surf, (self.x_pos, self.y_pos))
+
 
 
