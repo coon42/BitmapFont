@@ -19,7 +19,7 @@ class _BitmapChar():
 class BitmapFont:
     def __init__(self):
         # index starts at 0x20h
-        self.ascii_table = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
+        self.ascii_table = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
         self.char_dict = {}
         self.font_surface = None
         self.surf_arr = None
@@ -48,7 +48,7 @@ class BitmapFont:
         self.state = self.SEARCH_NEXT_CHAR
         self._cur_x_pos = 0
         self._last_char_x_pos = 0
-        self._cur_char_index  = -1
+        self._cur_char_index  = -2
 
         all_chars_found = False
         while(not all_chars_found):
@@ -83,14 +83,14 @@ class BitmapFont:
                     end_of_bitmap = True
                 elif next_key_pos - self._last_char_x_pos > 2:
                     x_pos_start = self._last_char_x_pos
-                    x_pos_end = next_key_pos 
+                    x_pos_end = next_key_pos
                     self._last_char_x_pos = x_pos_end
 
                     char = _BitmapChar(self.font_surface, self.ascii_table[self._cur_char_index], x_pos_start, 1, x_pos_end - 1, self.font_surface.get_height())
                     return char
                 else:
                     x_pos_start = next_key_pos
-                    self._last_letter_x_pos = x_pos_start 
+                    self._last_letter_x_pos = x_pos_start
                     self.state = self.SEARCH_NEXT_CHAR
             
     def _get_next_key_pixel_x_pos(self):
@@ -105,26 +105,31 @@ class BitmapFont:
 
 
 class BitmapFontScroller:
-    def __init__(self, target_surface, x_pos, y_pos):
+    def __init__(self, target_surface, font_path, x_pos, y_pos):
         self.scroller_surf = pygame.Surface((200, 30))
+        self.scroller_surf.fill(pygame.Color("red"))
         self.bf = BitmapFont()
-        self.bf.load_bitmap_font("fonts/1/coolspot.bmp")
+        self.bf.load_bitmap_font(font_path)
         self.text = ""
         self.cur_text_pos = 0
         self.target_surface = target_surface
         self.x_pos = x_pos
         self.y_pos = y_pos
 
+
     def set_text(self, text):
         self.text = text
         self.cur_text_pos = 0
 
-    def _drop_char(self):
-        cur_char = self.text[self.cur_text_pos]
-        self.bf.put_bitmap_char(self.scroller_surf, 0, cur_char)
+    def _drop_char(self, char):
+        #cur_char = self.text[self.cur_text_pos]
+
+        cur_char = self.bf.char_dict['C']
+        self.bf.put_bitmap_char(self.scroller_surf, self.scroller_surf.get_width() - cur_char.get_width(), 0, char)
 
     def tick(self):
         self.x_pos -= 1
+        self.scroller_surf.blit(self.scroller_surf, (self.x_pos - 1, self.y_pos))
         self.target_surface.blit(self.scroller_surf, (self.x_pos, self.y_pos))
 
 
