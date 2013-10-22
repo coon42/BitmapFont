@@ -20,10 +20,10 @@ class BitmapFont:
     def __init__(self):
         # index starts at 0x20h
         self.ascii_table = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"
-        self.char_dict = {}
-        self.font_surface = None
-        self.surf_arr = None
-        self.SEARCH_NEXT_CHAR, self.GET_CHAR_WIDTH = range(2)
+        self.char_dict = {} # contains all coordinates of every char in the font bitmap
+        self.font_surface = None # surface of bitmap font
+        self.surf_arr = None # surface as array
+        self.SEARCH_NEXT_CHAR, self.GET_CHAR_WIDTH = range(2) # state machine for bitmap font parser
 
     def load_bitmap_font(self, path):
         self.font_surface = pygame.image.load(path).convert() # convert bitmap format to screen formal (pixel depth etc...)
@@ -39,9 +39,12 @@ class BitmapFont:
             char_width = self.char_dict[char].get_width()
             cur_x_pos += char_width
  
-    def put_bitmap_char(self, surface, x_pos, y_pos, char):
+    def put_bitmap_char(self, surface, x_pos, y_pos, char, x_offset = 0, width = None):
         char = self.char_dict[char]
-        surface.blit( self.font_surface, (x_pos, y_pos), pygame.Rect(char.left, char.top, char.get_width(), char.get_height()) )
+        
+
+
+        surface.blit(self.font_surface, (x_pos, y_pos), pygame.Rect(char.left, char.top, char.get_width(), char.get_height()))
 
 
     def _scan_letter_coords(self):
@@ -110,8 +113,8 @@ class BitmapFontScroller:
         self.scroller_surf.fill(pygame.Color("red"))
         self.bf = BitmapFont()
         self.bf.load_bitmap_font(font_path)
-        self.text = ""
-        self.cur_text_pos = 0
+        self.text = "COON"
+        self.cur_char_index = 0
         self.target_surface = target_surface
         self.x_pos = x_pos
         self.y_pos = y_pos
@@ -119,18 +122,27 @@ class BitmapFontScroller:
 
     def set_text(self, text):
         self.text = text
-        self.cur_text_pos = 0
+        self.cur_char_index = 0
 
     def _drop_char(self, char):
-        #cur_char = self.text[self.cur_text_pos]
+        cur_char = self.text[self.cur_char_index]
 
         cur_char = self.bf.char_dict['C']
         self.bf.put_bitmap_char(self.scroller_surf, self.scroller_surf.get_width() - cur_char.get_width(), 0, char)
 
     def tick(self):
-        self.x_pos -= 1
-        self.scroller_surf.blit(self.scroller_surf, (self.x_pos - 1, self.y_pos))
+        self.scroller_surf.blit(self.scroller_surf, (-1, 0))
+
+        self.scroller_surf.fill(pygame.Color("red"),
+                                pygame.Rect(self.scroller_surf.get_width() - 1,
+                                            0,
+                                            1,
+                                            self.scroller_surf.get_height()))
+
         self.target_surface.blit(self.scroller_surf, (self.x_pos, self.y_pos))
+
+
+
 
 
 
