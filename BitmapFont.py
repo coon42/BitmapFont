@@ -41,10 +41,9 @@ class BitmapFont:
  
     def put_bitmap_char(self, surface, x_pos, y_pos, char, x_offset = 0, width = None):
         char = self.char_dict[char]
-        
+        char_width = char.get_width() - x_offset if width == None else width
 
-
-        surface.blit(self.font_surface, (x_pos, y_pos), pygame.Rect(char.left, char.top, char.get_width(), char.get_height()))
+        surface.blit(self.font_surface, (x_pos, y_pos), pygame.Rect(char.left + x_offset, char.top, char_width, char.get_height()))
 
 
     def _scan_letter_coords(self):
@@ -89,7 +88,7 @@ class BitmapFont:
                     x_pos_end = next_key_pos
                     self._last_char_x_pos = x_pos_end
 
-                    char = _BitmapChar(self.font_surface, self.ascii_table[self._cur_char_index], x_pos_start, 1, x_pos_end - 1, self.font_surface.get_height())
+                    char = _BitmapChar(self.font_surface, self.ascii_table[self._cur_char_index], x_pos_start + 1, 1, x_pos_end, self.font_surface.get_height())
                     return char
                 else:
                     x_pos_start = next_key_pos
@@ -113,7 +112,7 @@ class BitmapFontScroller:
         self.scroller_surf.fill(pygame.Color("red"))
         self.bf = BitmapFont()
         self.bf.load_bitmap_font(font_path)
-        self.text = "COON"
+        self.text = ""
         self.cur_char_index = 0
         self.target_surface = target_surface
         self.x_pos = x_pos
@@ -126,18 +125,17 @@ class BitmapFontScroller:
 
     def _drop_char(self, char):
         cur_char = self.text[self.cur_char_index]
-
-        cur_char = self.bf.char_dict['C']
+        cur_char = self.bf.char_dict[char]
         self.bf.put_bitmap_char(self.scroller_surf, self.scroller_surf.get_width() - cur_char.get_width(), 0, char)
 
     def tick(self):
-        self.scroller_surf.blit(self.scroller_surf, (-1, 0))
+        self.scroller_surf.blit(self.scroller_surf, (0, 0))
 
-        self.scroller_surf.fill(pygame.Color("red"),
-                                pygame.Rect(self.scroller_surf.get_width() - 1,
-                                            0,
-                                            1,
-                                            self.scroller_surf.get_height()))
+        #self.scroller_surf.fill(pygame.Color("red"),
+        #                        pygame.Rect(self.scroller_surf.get_width() - 1,
+        #                                    0,
+        #                                    1,
+        #                                    self.scroller_surf.get_height()))
 
         self.target_surface.blit(self.scroller_surf, (self.x_pos, self.y_pos))
 
